@@ -120,7 +120,7 @@ int main (int argc, char *argv[]) {
       //printf("\n===== Stream Buffer(s) contents =====\n");
    }
 
-   printf("\n===== Measurements =====\n");
+   printf("\n===== Measurements =====");
    printf("\na. L1 reads:\t\t%d", L1.reads);
    printf("\nb. L1 read misses:\t\t%d", L1.read_misses);
    printf("\nc. L1 writes:\t\t%d", L1.writes);
