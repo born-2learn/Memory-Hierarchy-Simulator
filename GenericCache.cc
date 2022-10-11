@@ -211,17 +211,41 @@ void GenericCache::PrintContents(){
     //printf("%d %d %d %d",read_misses,write_misses,reads,writes );
     //printf("%f", miss_rate);
     for (int set=0; set<number_of_sets; set++){
-        
-        
-        printf("set\t%d:\t", set);
+        bool printSet = false;
+
+        // check if there is at lease 1 valid block in set
+        for (int i=0; i<assoc; i++){
+            if (cacheBlocks[set][i].v){
+                printSet = true;
+                break;
+            }
+        }
         char dirty_bit = ' ';
+        if (printSet){
+            printf("set\t%d:\t", set);
+            for (int k=0; k<assoc; k++){
+                for (int i=0; i<assoc; i++){
+                    if (cacheBlocks[set][i].lru==k){
+                        if (cacheBlocks[set][i].v){
+                            if (cacheBlocks[set][i].d==true){
+                                dirty_bit = 'D';
+                            }
+                            printf("%x %c\t", cacheBlocks[set][i].tag, dirty_bit);
+                        }
+                    }
+                }
+            }
+            printf("\n");
+        }
+        
+        /*
         for (int block=0; block<assoc; block++){
             if (cacheBlocks[set][block].d==true){
                 dirty_bit = 'D';
             }
             printf("%x %c\t", cacheBlocks[set][block].tag, dirty_bit);
         }
-        printf("\n");
+        printf("\n");*/
     }
 }
 
