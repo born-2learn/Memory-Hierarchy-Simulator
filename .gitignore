@@ -3,5 +3,5 @@ playwithcpp.cc
 miniaturized_trace.txt
 a.txt
 *.o
-run.sh
+*.sh
 *.txt
