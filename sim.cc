@@ -9,7 +9,7 @@ void addressDecoder(uint32_t address, uint32_t blocksize, int sets, int *tb, int
 
 
 int main (int argc, char *argv[]) {
-   
+
    FILE *fp;			// File pointer.
    char *trace_file;		// This variable holds the trace file name.
    cache_params_t params;	// Look at the sim.h header file for the definition of struct cache_params_t.
@@ -137,7 +137,7 @@ int main (int argc, char *argv[]) {
    printf("\nn. L2 miss rate:\t\t%d", L2.miss_rate);
    printf("\no. L2 writebacks:\t\t%d", L2.writebacks);
    printf("\np. L2 prefetches:\t\t%d", L2.prefetch_read);
-   printf("\nq. memory traffic:\t\t4"); 
+   printf("\nq. memory traffic:\t\t%d", L2.write_misses+L2.read_misses+L2.writebacks); 
 
 
    return(0);

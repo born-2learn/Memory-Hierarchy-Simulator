@@ -58,15 +58,13 @@ void GenericCache::cacheRead(uint32_t address){
     uint32_t tag_addr = 0;
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
-    
-    //printf("add: bo, i, tag %x: %x %x %x\n",address, block_offset_addr, index_addr, tag_addr);
 
-    for (int i=0; i<assoc; i++){
+    for (int block=0; block<assoc; block++){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
-        if (cacheBlocks[index_addr][i].tag == tag_addr){ //cache hit
+        if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
             //printf("Read Hit\n");
-            LRU_Update(index_addr, i);
+            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
         }
     }
@@ -82,7 +80,7 @@ void GenericCache::cacheRead(uint32_t address){
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
-    LRU_Update(index_addr, blockToBeUpdated);
+    LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
 }
 
 void GenericCache::cacheWrite(uint32_t address){
@@ -95,13 +93,13 @@ void GenericCache::cacheWrite(uint32_t address){
     
     //printf("%x: %x %x %x\n",address, block_offset_addr, index_addr, tag_addr);
 
-    for (int i=0; i<assoc; i++){
+    for (int block=0; block<assoc; block++){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
-        if (cacheBlocks[index_addr][i].tag == tag_addr){ //cache hit
+        if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
             //printf("Write Hit\n");
-            cacheBlocks[index_addr][i].d = true;
-            LRU_Update(index_addr, i);
+            cacheBlocks[index_addr][block].d = true;
+            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
         }
     }
@@ -118,7 +116,7 @@ void GenericCache::cacheWrite(uint32_t address){
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
-    LRU_Update(index_addr, blockToBeUpdated);
+    LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
 }
 
 uint32_t GenericCache::evictVictim(uint32_t address){
@@ -131,9 +129,9 @@ uint32_t GenericCache::evictVictim(uint32_t address){
     uint32_t blockToBeUpdated;
 
     // Finding the cache block with max LRU count (least recently used)
-    for(int i=0; i<assoc; i++){
-        if (cacheBlocks[index_addr][i].lru== (assoc-1)){
-            blockToBeUpdated = i; break;
+    for(int block=0; block<assoc; block++){
+        if (cacheBlocks[index_addr][block].lru== (assoc-1)){
+            blockToBeUpdated = block; break;
         }
     }
 
@@ -141,8 +139,9 @@ uint32_t GenericCache::evictVictim(uint32_t address){
     if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
         CacheWriteAdj(address);
         cacheBlocks[index_addr][blockToBeUpdated].d == false;
-        cacheBlocks[index_addr][blockToBeUpdated].v == false;
+        //cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
+    cacheBlocks[index_addr][blockToBeUpdated].d == false;
     return blockToBeUpdated;
 
 }
@@ -185,7 +184,7 @@ void GenericCache::PrintContents(){
         printf("set\t%d:\t", set);
         char dirty_bit = ' ';
         for (int block=0; block<assoc; block++){
-            if (cacheBlocks[set][block].d){
+            if (cacheBlocks[set][block].d==true){
                 dirty_bit = 'D';
             }
             printf("%x %c\t", cacheBlocks[set][block].tag, dirty_bit);
