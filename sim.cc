@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
    printf("\nb. L1 read misses:\t\t%d", L1.read_misses);
    printf("\nc. L1 writes:\t\t%d", L1.writes);
    printf("\nd. L1 write misses:\t\t%d", L1.write_misses);
-   printf("\ne. L1 miss rate:\t\t%d", L1.miss_rate);
+   printf("\ne. L1 miss rate:\t\t%f", L1.miss_rate);
    printf("\nf. L1 writebacks:\t\t%d", L1.writebacks);
    printf("\ng. L1 prefetches:\t\t%d", L1.prefetch_read);
    printf("\nh. L2 reads (demand):\t\t%d", L2.reads);
@@ -134,7 +134,7 @@ int main (int argc, char *argv[]) {
    printf("\nk. L2 read misses (prefetch):\t\t%d", L2.prefetch_read_misses);
    printf("\nl. L2 writes:\t\t%d", L2.writes);
    printf("\nm. L2 write misses:\t\t%d", L2.write_misses);
-   printf("\nn. L2 miss rate:\t\t%d", L2.miss_rate);
+   printf("\nn. L2 miss rate:\t\t%f", L2.read_misses/L2.reads);
    printf("\no. L2 writebacks:\t\t%d", L2.writebacks);
    printf("\np. L2 prefetches:\t\t%d", L2.prefetch_read);
    printf("\nq. memory traffic:\t\t%d", L2.write_misses+L2.read_misses+L2.writebacks); 

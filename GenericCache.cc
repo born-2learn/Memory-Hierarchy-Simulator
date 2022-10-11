@@ -191,6 +191,7 @@ void GenericCache::PrintContents(){
         }
         printf("\n");
     }
+    miss_rate = ((float) (read_misses+write_misses)/(reads+writes));
 }
 
 
