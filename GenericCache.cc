@@ -59,7 +59,7 @@ void GenericCache::cacheRead(uint32_t address){
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
     
-    //printf("%x: %x %x %x\n",address, block_offset_addr, index_addr, tag_addr);
+    printf("add: bo, i, tag %x: %x %x %x\n",address, block_offset_addr, index_addr, tag_addr);
 
     for (int i=0; i<assoc; i++){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
@@ -81,7 +81,7 @@ void GenericCache::cacheRead(uint32_t address){
     CacheReadAdj(address);
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
-    cacheBlocks[index_addr][blockToBeUpdated].tag = address;
+    cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     LRU_Update(index_addr, blockToBeUpdated);
 }
 
@@ -117,7 +117,7 @@ void GenericCache::cacheWrite(uint32_t address){
     CacheReadAdj(address);
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
-    cacheBlocks[index_addr][blockToBeUpdated].tag = address;
+    cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     LRU_Update(index_addr, blockToBeUpdated);
 }
 
