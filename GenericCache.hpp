@@ -3,6 +3,7 @@ struct BLOCKS{
     bool v;
     bool d;
     uint32_t tag;
+    uint32_t address;
     int lru;
 };
 
@@ -12,7 +13,7 @@ private:
     uint32_t blocksize;
     uint32_t size;
     uint32_t assoc;
-
+    int cache_level;
     struct BLOCKS **cacheBlocks;
     GenericCache *nextCache;
 
@@ -36,7 +37,7 @@ public:
     int prefetch_read=0; int prefetch_read_misses=0;
 
     GenericCache();
-    GenericCache(uint32_t, uint32_t, uint32_t,  GenericCache*);
+    GenericCache(uint32_t, uint32_t, uint32_t, int, GenericCache*);
 
     void addressDecoder(uint32_t, uint32_t*, uint32_t*, uint32_t*);
     void cacheRead(uint32_t);

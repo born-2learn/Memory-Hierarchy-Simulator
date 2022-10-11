@@ -9,9 +9,9 @@ GenericCache::GenericCache(){
 
 }
 
-GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, GenericCache* nextCache){
+GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, int cache_level, GenericCache* nextCache){
 
-    this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache;
+    this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache, this->cache_level=cache_level;
 
     number_of_sets = size/(assoc*blocksize);
 
@@ -28,6 +28,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, Ge
     for (int i =0; i<number_of_sets; i++ ){
         for (int j=0; j<assoc; j++){
             cacheBlocks[i][j].tag = 0;
+            cacheBlocks[i][j].address = 0;
             cacheBlocks[i][j].lru = j;
             cacheBlocks[i][j].v = false;
             cacheBlocks[i][j].d = false;
@@ -63,14 +64,14 @@ void GenericCache::cacheRead(uint32_t address){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
-            //printf("Read Hit\n");
+            printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
         }
     }
 
     read_misses+=1;
-    //printf("Read Miss\n");
+    printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
 
     int blockToBeUpdated;
 
@@ -80,6 +81,7 @@ void GenericCache::cacheRead(uint32_t address){
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
+    cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
 }
 
@@ -97,7 +99,7 @@ void GenericCache::cacheWrite(uint32_t address){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
-            //printf("Write Hit\n");
+            printf("%x: Write Hit in Cache L%d\n", tag_addr, cache_level);
             cacheBlocks[index_addr][block].d = true;
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
@@ -105,17 +107,18 @@ void GenericCache::cacheWrite(uint32_t address){
     }
 
     write_misses+=1;
-    //printf("Write Miss\n");
+    printf("%x: Write Miss in Cache L%d\n", tag_addr, cache_level);
 
     int blockToBeUpdated;
 
     //evicting the victim block and bringing in new block from next level
     //followed by writing to new block (setting d=true)
     blockToBeUpdated = evictVictim(address);
-    CacheReadAdj(address);
+    CacheReadAdj(address); 
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
+    cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
 }
 
@@ -127,17 +130,27 @@ uint32_t GenericCache::evictVictim(uint32_t address){
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
 
     uint32_t blockToBeUpdated;
+    uint32_t oldAddress;
 
     // Finding the cache block with max LRU count (least recently used)
     for(int block=0; block<assoc; block++){
         if (cacheBlocks[index_addr][block].lru== (assoc-1)){
-            blockToBeUpdated = block; break;
+            blockToBeUpdated = block;
+            
+            break;
         }
     }
 
     //Finding out if the block with max LRU count is dirty
     if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
-        CacheWriteAdj(address);
+
+        //get the old address of victim block
+        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
+        //oldAddressIndex = index_addr;
+        //oldAddressBlockOffset = 0;
+
+        printf("dirty block identified");
+        CacheWriteAdj(oldAddress);
         cacheBlocks[index_addr][blockToBeUpdated].d == false;
         //cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
