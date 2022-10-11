@@ -5,6 +5,8 @@
 #include "sim.h"
 #include "GenericCache.hpp"
 
+bool debug = false;
+
 GenericCache::GenericCache(){
 
 }
@@ -64,15 +66,19 @@ void GenericCache::cacheRead(uint32_t address){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
-            printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
+            if(debug){
+                printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
+            }
+            
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
         }
     }
 
     read_misses+=1;
-    printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
-
+    if (debug){
+        printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
+    }
     int blockToBeUpdated;
 
     //evicting the victim block and bringing in new block from next level
@@ -99,7 +105,10 @@ void GenericCache::cacheWrite(uint32_t address){
         //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
             //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
-            printf("%x: Write Hit in Cache L%d\n", tag_addr, cache_level);
+            if(debug){
+                printf("%x: Write Hit in Cache L%d\n", tag_addr, cache_level);
+            }
+            
             cacheBlocks[index_addr][block].d = true;
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
@@ -107,8 +116,9 @@ void GenericCache::cacheWrite(uint32_t address){
     }
 
     write_misses+=1;
-    printf("%x: Write Miss in Cache L%d\n", tag_addr, cache_level);
-
+    if(debug){
+        printf("%x: Write Miss in Cache L%d\n", tag_addr, cache_level);
+    }
     int blockToBeUpdated;
 
     //evicting the victim block and bringing in new block from next level
@@ -149,7 +159,9 @@ uint32_t GenericCache::evictVictim(uint32_t address){
         //oldAddressIndex = index_addr;
         //oldAddressBlockOffset = 0;
 
-        printf("dirty block identified");
+        if(debug){
+            printf("dirty block identified");
+        }
         CacheWriteAdj(oldAddress);
         cacheBlocks[index_addr][blockToBeUpdated].d == false;
         //cacheBlocks[index_addr][blockToBeUpdated].v == false;
