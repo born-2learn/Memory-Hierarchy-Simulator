@@ -182,7 +182,7 @@ void GenericCache::CacheWriteAdj(uint32_t address){
 
 void GenericCache::PrintContents(){
     for (int set=0; set<number_of_sets; set++){
-        printf("set\t%d:", set);
+        printf("set\t%d:\t", set);
         char dirty_bit = ' ';
         for (int block=0; block<assoc; block++){
             if (cacheBlocks[set][block].d){
