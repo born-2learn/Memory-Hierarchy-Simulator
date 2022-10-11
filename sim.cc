@@ -132,9 +132,17 @@ int main (int argc, char *argv[]) {
    printf("\ni. L2 read misses (demand):\t\t%d", L2.read_misses);
    printf("\nj. L2 reads (prefetch):\t\t%d", L2.prefetch_read);
    printf("\nk. L2 read misses (prefetch):\t\t%d", L2.prefetch_read_misses);
+   
+
    printf("\nl. L2 writes:\t\t%d", L2.writes);
    printf("\nm. L2 write misses:\t\t%d", L2.write_misses);
-   printf("\nn. L2 miss rate:\t\t%f", L2.read_misses/L2.reads);
+   if (params.L2_SIZE !=0){
+      printf("\nn. L2 miss rate:\t\t%f", L2.read_misses/L2.reads);
+   }
+   else{
+      printf("\nn. L2 miss rate:\t\t%f",0.0 );
+   }
+   
    printf("\no. L2 writebacks:\t\t%d", L2.writebacks);
    printf("\np. L2 prefetches:\t\t%d", L2.prefetch_read);
    printf("\nq. memory traffic:\t\t%d", L2.write_misses+L2.read_misses+L2.writebacks); 
