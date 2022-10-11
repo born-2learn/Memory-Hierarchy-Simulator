@@ -9,6 +9,7 @@ void addressDecoder(uint32_t address, uint32_t blocksize, int sets, int *tb, int
 
 
 int main (int argc, char *argv[]) {
+   
    FILE *fp;			// File pointer.
    char *trace_file;		// This variable holds the trace file name.
    cache_params_t params;	// Look at the sim.h header file for the definition of struct cache_params_t.
