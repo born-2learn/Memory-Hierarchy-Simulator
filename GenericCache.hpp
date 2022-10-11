@@ -31,7 +31,7 @@ private:
 public:
 
     int reads=0; int read_misses=0; int writes=0; int write_misses=0; 
-    int miss_rate=0; int writebacks = 0;
+    float miss_rate=0; int writebacks = 0;
 
     int prefetch_read=0; int prefetch_read_misses=0;
 

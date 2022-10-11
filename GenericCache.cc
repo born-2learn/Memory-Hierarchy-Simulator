@@ -180,7 +180,14 @@ void GenericCache::CacheWriteAdj(uint32_t address){
 }
 
 void GenericCache::PrintContents(){
+    float num = (float)read_misses+write_misses;
+    float den = (float)reads+writes;
+    miss_rate = num/den;
+    //printf("%d %d %d %d",read_misses,write_misses,reads,writes );
+    //printf("%f", miss_rate);
     for (int set=0; set<number_of_sets; set++){
+        
+        
         printf("set\t%d:\t", set);
         char dirty_bit = ' ';
         for (int block=0; block<assoc; block++){
@@ -191,7 +198,6 @@ void GenericCache::PrintContents(){
         }
         printf("\n");
     }
-    miss_rate = ((float) (read_misses+write_misses)/(reads+writes));
 }
 
 
