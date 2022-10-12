@@ -54,7 +54,6 @@ void GenericCache::addressDecoder(uint32_t address,uint32_t *block_offset_addr,u
 
 void GenericCache::cacheRead(uint32_t address){
     reads++;
-    //printf("reads %d %x\n", reads, address);
 
     uint32_t block_offset_addr = 0;
     uint32_t index_addr = 0;
@@ -63,9 +62,9 @@ void GenericCache::cacheRead(uint32_t address){
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
 
     for (int block=0; block<assoc; block++){
-        //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
+        
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
-            //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
+            
             if(debug){
                 printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
             }
@@ -99,12 +98,11 @@ void GenericCache::cacheWrite(uint32_t address){
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
     
-    //printf("%x: %x %x %x\n",address, block_offset_addr, index_addr, tag_addr);
 
     for (int block=0; block<assoc; block++){
-        //printf("Cache Index: %x, tag of addr: %x, tag of cache: %x, v: %d, d:%d\n", index_addr, tag_addr, cacheBlocks[index_addr][i].tag, cacheBlocks[index_addr][i].v, cacheBlocks[index_addr][i].d);
+        
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
-            //LRU_Update(index_addr, cacheBlocks[index_addr][i].lru);
+            
             if(debug){
                 printf("%x: Write Hit in Cache L%d\n", tag_addr, cache_level);
             }
@@ -156,17 +154,15 @@ uint32_t GenericCache::evictVictim(uint32_t address){
 
         //get the old address of victim block
         oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
-        //oldAddressIndex = index_addr;
-        //oldAddressBlockOffset = 0;
 
         if(debug){
             printf("dirty block identified");
         }
         CacheWriteAdj(oldAddress);
-        cacheBlocks[index_addr][blockToBeUpdated].d == false;
+        //cacheBlocks[index_addr][blockToBeUpdated].d == false;
         //cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
-    cacheBlocks[index_addr][blockToBeUpdated].d == false;
+    //cacheBlocks[index_addr][blockToBeUpdated].d == false;
     return blockToBeUpdated;
 
 }
