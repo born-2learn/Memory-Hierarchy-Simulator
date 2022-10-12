@@ -137,7 +137,10 @@ int main (int argc, char *argv[]) {
    printf("\nl. L2 writes:\t\t%d", L2.writes);
    printf("\nm. L2 write misses:\t\t%d", L2.write_misses);
    if (params.L2_SIZE !=0){
-      printf("\nn. L2 miss rate:\t\t%.4f", L2.read_misses/L2.reads);
+      float l2_miss_rate = 0.0;
+      float l2_read_misses = (float)L2.read_misses; float l2_reads = (float) L2.reads;
+      l2_miss_rate = (float) l2_read_misses/l2_reads;
+      printf("\nn. L2 miss rate:\t\t%.4f", l2_miss_rate);
    }
    else{
       printf("\nn. L2 miss rate:\t\t%.4f",0.0000 );
