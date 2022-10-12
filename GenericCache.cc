@@ -11,10 +11,10 @@ GenericCache::GenericCache(){
 
 }
 
-GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, int cache_level, GenericCache* nextCache){
+GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, int cache_level, int N, int M, GenericCache* nextCache){
 
     this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache, this->cache_level=cache_level;
-
+    this->N = N; this-> M = M;
     number_of_sets = size/(assoc*blocksize);
 
     block_offset_width = (int)log2(blocksize);
@@ -25,6 +25,18 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
     for (int i=0; i<number_of_sets; i++){
         cacheBlocks[i] = new BLOCKS[assoc]; //assigning each set  
     }
+    /* Stream Buffer Init
+    streamBuffers = new StreamBuffers *[N];
+    //streamBuffers.memoryblocks = new int(M);
+
+    for (int i=0; i<N; i++){
+        streamBuffers[i].lru = i;
+        streamBuffers[i].v = 0;
+        for(int j=0; j<M; j++){
+            streamBuffers.memoryblocks[j] = 0;
+        }
+    }
+    */
 
     //Assigning zero values to all tags, valid bits and dirty bits
     for (int i =0; i<number_of_sets; i++ ){

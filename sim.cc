@@ -35,11 +35,11 @@ int main (int argc, char *argv[]) {
 
    GenericCache L1; GenericCache L2;
    if (params.L2_SIZE !=0){
-      L2 = GenericCache(params.BLOCKSIZE, params.L2_SIZE, params.L2_ASSOC, 2, NULL);
-      L1 = GenericCache(params.BLOCKSIZE, params.L1_SIZE, params.L1_ASSOC, 1, &L2);
+      L2 = GenericCache(params.BLOCKSIZE, params.L2_SIZE, params.L2_ASSOC, params.PREF_N, params.PREF_M, 2, NULL);
+      L1 = GenericCache(params.BLOCKSIZE, params.L1_SIZE, params.L1_ASSOC, 0, 0, 1, &L2);
    }
    else{
-      L1 = GenericCache(params.BLOCKSIZE, params.L1_SIZE, params.L1_ASSOC, 1, NULL);
+      L1 = GenericCache(params.BLOCKSIZE, params.L1_SIZE, params.L1_ASSOC, params.PREF_N, params.PREF_M, 1, NULL);
    }
    int L1_SETS = params.L1_SIZE/(params.L1_ASSOC*params.BLOCKSIZE);
    int L2_SETS = params.L2_SIZE/(params.L2_ASSOC*params.BLOCKSIZE);

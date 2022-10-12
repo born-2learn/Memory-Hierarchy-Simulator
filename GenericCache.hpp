@@ -6,6 +6,11 @@ struct BLOCKS{
     uint32_t address;
     int lru;
 };
+struct StreamBuffers{ // N stream buffers to be created and initialized
+    bool v;
+    int lru;
+    uint32_t *memoryblocks; // memory blocks of stream buffer of size M
+};
 
 class GenericCache
 {
@@ -14,6 +19,9 @@ private:
     uint32_t size;
     uint32_t assoc;
     int cache_level;
+    int N;
+    int M;
+    struct StreamBuffers **streamBuffers;
     struct BLOCKS **cacheBlocks;
     GenericCache *nextCache;
 
@@ -37,7 +45,7 @@ public:
     int prefetch_read=0; int prefetch_read_misses=0;
 
     GenericCache();
-    GenericCache(uint32_t, uint32_t, uint32_t, int, GenericCache*);
+    GenericCache(uint32_t, uint32_t, uint32_t, int, int, int, GenericCache*);
 
     void addressDecoder(uint32_t, uint32_t*, uint32_t*, uint32_t*);
     void cacheRead(uint32_t);
