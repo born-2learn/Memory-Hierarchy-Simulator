@@ -101,7 +101,7 @@ void GenericCache::cacheRead(uint32_t address){
             printf("dirty block identified");
         }
         CacheWriteAdj(oldAddress);
-        cacheBlocks[index_addr][blockToBeUpdated].d == false;
+        //cacheBlocks[index_addr][blockToBeUpdated].d == false;
         cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
 
@@ -154,7 +154,8 @@ void GenericCache::cacheWrite(uint32_t address){
         }
     }
 
-    if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
+    // evict only if the victim block is dirty
+    if (cacheBlocks[index_addr][blockToBeUpdated].d==true ){
         //get the old address of victim block
         oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
 
