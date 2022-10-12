@@ -15,14 +15,14 @@ SIM_OBJ = sim.o GenericCache.o
 # default rule
 
 all: sim
-	@echo "my work is done here..."
+	@echo "Compiled the Simulator successfully."
 
 
 # rule for making sim
 
 sim: $(SIM_OBJ)
 	$(CC) -o sim $(CFLAGS) $(SIM_OBJ) -lm
-	@echo "-----------DONE WITH sim-----------"
+	@echo "Sim generated."
 
 
 # generic rule for converting any .cc file to any .o file

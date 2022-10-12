@@ -78,10 +78,34 @@ void GenericCache::cacheRead(uint32_t address){
     if (debug){
         printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
     }
-    int blockToBeUpdated;
+    
+    
 
-    //evicting the victim block and bringing in new block from next level
-    blockToBeUpdated = evictVictim(address);
+    //evicting the victim block
+    int blockToBeUpdated;
+    uint32_t oldAddress;
+
+    // Finding the cache block with max LRU count (least recently used)
+    for(int block=0; block<assoc; block++){
+        if (cacheBlocks[index_addr][block].lru== (assoc-1)){
+            blockToBeUpdated = block;
+            break;
+        }
+    }
+
+    if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
+        //get the old address of victim block
+        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
+
+        if(debug){
+            printf("dirty block identified");
+        }
+        CacheWriteAdj(oldAddress);
+        cacheBlocks[index_addr][blockToBeUpdated].d == false;
+        cacheBlocks[index_addr][blockToBeUpdated].v == false;
+    }
+
+    //blockToBeUpdated = evictVictim(address);
     CacheReadAdj(address);
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
@@ -117,11 +141,34 @@ void GenericCache::cacheWrite(uint32_t address){
     if(debug){
         printf("%x: Write Miss in Cache L%d\n", tag_addr, cache_level);
     }
+    
+    //evicting the victim block
     int blockToBeUpdated;
+    uint32_t oldAddress;
 
-    //evicting the victim block and bringing in new block from next level
+    // Finding the cache block with max LRU count (least recently used)
+    for(int block=0; block<assoc; block++){
+        if (cacheBlocks[index_addr][block].lru== (assoc-1)){
+            blockToBeUpdated = block;
+            break;
+        }
+    }
+
+    if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
+        //get the old address of victim block
+        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
+
+        if(debug){
+            printf("dirty block identified");
+        }
+        CacheWriteAdj(oldAddress);
+        cacheBlocks[index_addr][blockToBeUpdated].d == false;
+        cacheBlocks[index_addr][blockToBeUpdated].v == false;
+    }
+
+    //bringing in new block from next level
     //followed by writing to new block (setting d=true)
-    blockToBeUpdated = evictVictim(address);
+    //blockToBeUpdated = evictVictim(address);
     CacheReadAdj(address); 
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
@@ -204,8 +251,7 @@ void GenericCache::PrintContents(){
     float num = (float)read_misses+write_misses;
     float den = (float)reads+writes;
     miss_rate = num/den;
-    //printf("%d %d %d %d",read_misses,write_misses,reads,writes );
-    //printf("%f", miss_rate);
+    
     for (int set=0; set<number_of_sets; set++){
         bool printSet = false;
 
