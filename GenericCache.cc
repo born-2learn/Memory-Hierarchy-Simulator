@@ -83,29 +83,9 @@ void GenericCache::cacheRead(uint32_t address){
 
     //evicting the victim block
     int blockToBeUpdated;
-    uint32_t oldAddress;
+    
 
-    // Finding the cache block with max LRU count (least recently used)
-    for(int block=0; block<assoc; block++){
-        if (cacheBlocks[index_addr][block].lru== (assoc-1)){
-            blockToBeUpdated = block;
-            break;
-        }
-    }
-
-    if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
-        //get the old address of victim block
-        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
-
-        if(debug){
-            printf("dirty block identified");
-        }
-        CacheWriteAdj(oldAddress);
-        //cacheBlocks[index_addr][blockToBeUpdated].d == false;
-        cacheBlocks[index_addr][blockToBeUpdated].v == false;
-    }
-
-    //blockToBeUpdated = evictVictim(address);
+    blockToBeUpdated = evictVictim(address);
     CacheReadAdj(address);
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
@@ -144,32 +124,8 @@ void GenericCache::cacheWrite(uint32_t address){
     
     //evicting the victim block
     int blockToBeUpdated;
-    uint32_t oldAddress;
-
-    // Finding the cache block with max LRU count (least recently used)
-    for(int block=0; block<assoc; block++){
-        if (cacheBlocks[index_addr][block].lru== (assoc-1)){
-            blockToBeUpdated = block;
-            break;
-        }
-    }
-
-    // evict only if the victim block is dirty
-    if (cacheBlocks[index_addr][blockToBeUpdated].d==true ){
-        //get the old address of victim block
-        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
-
-        if(debug){
-            printf("dirty block identified");
-        }
-        CacheWriteAdj(oldAddress);
-        cacheBlocks[index_addr][blockToBeUpdated].d == false;
-        cacheBlocks[index_addr][blockToBeUpdated].v == false;
-    }
-
-    //bringing in new block from next level
-    //followed by writing to new block (setting d=true)
-    //blockToBeUpdated = evictVictim(address);
+    
+    blockToBeUpdated = evictVictim(address);
     CacheReadAdj(address); 
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
@@ -185,23 +141,23 @@ uint32_t GenericCache::evictVictim(uint32_t address){
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
 
-    uint32_t blockToBeUpdated;
+    
+    uint32_t victimBlock;
     uint32_t oldAddress;
 
     // Finding the cache block with max LRU count (least recently used)
     for(int block=0; block<assoc; block++){
         if (cacheBlocks[index_addr][block].lru== (assoc-1)){
-            blockToBeUpdated = block;
-            
+            victimBlock = block;
             break;
         }
     }
 
     //Finding out if the block with max LRU count is dirty
-    if (cacheBlocks[index_addr][blockToBeUpdated].d==true){
+    if (cacheBlocks[index_addr][victimBlock].d==true){
 
         //get the old address of victim block
-        oldAddress = cacheBlocks[index_addr][blockToBeUpdated].address;
+        oldAddress = cacheBlocks[index_addr][victimBlock].address;
 
         if(debug){
             printf("dirty block identified");
@@ -211,7 +167,7 @@ uint32_t GenericCache::evictVictim(uint32_t address){
         //cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
     //cacheBlocks[index_addr][blockToBeUpdated].d == false;
-    return blockToBeUpdated;
+    return victimBlock;
 
 }
 
@@ -265,7 +221,7 @@ void GenericCache::PrintContents(){
         }
         char dirty_bit = ' ';
         if (printSet){
-            printf("set\t%d:\t", set);
+            printf("set  %d: ", set);
             for (int k=0; k<assoc; k++){
                 for (int i=0; i<assoc; i++){
                     if (cacheBlocks[set][i].lru==k){
@@ -273,7 +229,10 @@ void GenericCache::PrintContents(){
                             if (cacheBlocks[set][i].d==true){
                                 dirty_bit = 'D';
                             }
-                            printf("%x %c", cacheBlocks[set][i].tag, dirty_bit);
+                            else if(cacheBlocks[set][i].d==false) {
+                                dirty_bit = ' ';
+                            }
+                            printf("%x %c  ", cacheBlocks[set][i].tag, dirty_bit);
                         }
                     }
                 }
