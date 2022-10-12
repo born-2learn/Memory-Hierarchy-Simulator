@@ -273,7 +273,7 @@ void GenericCache::PrintContents(){
                             if (cacheBlocks[set][i].d==true){
                                 dirty_bit = 'D';
                             }
-                            printf("%x %c\t", cacheBlocks[set][i].tag, dirty_bit);
+                            printf("%x %c", cacheBlocks[set][i].tag, dirty_bit);
                         }
                     }
                 }
