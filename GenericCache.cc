@@ -42,7 +42,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         }
         for (int i=0; i<N; i++){
             streamBuffers[i].lru = i;
-            streamBuffers[i].v = 0;
+            streamBuffers[i].v = false;
             //printf("LRU %d",streamBuffers[i].lru );
             for (int j=0; j<M; j++){
                 streamBuffers[i].memoryblocks[j]=0;
@@ -254,6 +254,7 @@ void GenericCache::prefetch(uint32_t address){
             streamBuffers[activeStreamBuffer].memoryblocks[j] = (address + (M-activeMemoryBlock)+ j + 1);
         }
     }
+    streamBuffers[activeStreamBuffer].v = true;
     LRU_Update_stream_buffer(activeStreamBuffer);
     activeMemoryBlock = -1;
 }
@@ -340,7 +341,9 @@ void GenericCache::PrintContents(){
 }
 
 void GenericCache::PrintStreamBufferContents(){
-    
+    //for (int i=0; i<N; i++){
+
+    //}
 
     for (int i=0; i<N; i++){
         for (int j=0; j<N; j++){
