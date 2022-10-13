@@ -33,7 +33,11 @@ private:
     int block_offset_width; int index_width; int tag_width;
     bool stream_buffer_present = false;
 
+    int activeStreamBuffer;//n
+    int activeMemoryBlock;//m
+
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
+    void LRU_Update_stream_buffer(int);
     void CacheWriteAdj(uint32_t);
     void CacheReadAdj(uint32_t);
     uint32_t evictVictim(uint32_t);
@@ -51,7 +55,10 @@ public:
     void addressDecoder(uint32_t, uint32_t*, uint32_t*, uint32_t*);
     void cacheRead(uint32_t);
     void cacheWrite(uint32_t);
+    bool readStreamBuffer(uint32_t);
+    void prefetch(uint32_t);
     void PrintContents();
+    void PrintStreamBufferContents();
 };
 
 

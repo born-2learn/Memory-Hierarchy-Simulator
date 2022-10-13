@@ -26,31 +26,35 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         cacheBlocks[i] = new BLOCKS[assoc]; //assigning each set  
     }
 
-    
+    activeStreamBuffer = -1; activeMemoryBlock = -1;
      //Stream Buffer Init 
-    if((N!=0) && (M!=0)){
+    if((N>0) && (M>0)){
         stream_buffer_present = true;
     }
-    /*
+    
     //Create stream buffer only if N>0 and M>0
     if (stream_buffer_present){
         streamBuffers = new StreamBuffers[N];
         //streamBuffers.memoryblocks = new int(M);
-        printf("N:%d M:%d\n", N, M);
         for (int i=0; i<N; i++){
             streamBuffers[i].memoryblocks = new uint32_t(M);
+            //streamBuffers[i].lru = i;
         }
         for (int i=0; i<N; i++){
             streamBuffers[i].lru = i;
             streamBuffers[i].v = 0;
-            for(int j=0; j<M; j++){
-                streamBuffers[i].memoryblocks[j] = j;
-                printf("%d ",streamBuffers[i].memoryblocks[j]);
+            //printf("LRU %d",streamBuffers[i].lru );
+            for (int j=0; j<M; j++){
+                streamBuffers[i].memoryblocks[j]=0;
+                //printf("%d ",streamBuffers[i].memoryblocks[j]);
             }
-            printf("\n");
+            //printf("\n");
         }
-        
-    }*/
+        //printf("N:%d M:%d\n", N, M);
+        activeStreamBuffer = N-1;
+        activeMemoryBlock = -1;
+
+    }
     
 
     //Assigning zero values to all tags, valid bits and dirty bits
@@ -88,6 +92,12 @@ void GenericCache::cacheRead(uint32_t address){
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
 
+    int n = -1; int m = -1; //location where there is a Stream Buffer Hit
+    bool streamBuffer_HIT = false;
+    if (stream_buffer_present){
+        streamBuffer_HIT = readStreamBuffer(tag_addr);
+    }
+
     for (int block=0; block<assoc; block++){
         
         if (cacheBlocks[index_addr][block].tag == tag_addr){ //cache hit
@@ -95,11 +105,17 @@ void GenericCache::cacheRead(uint32_t address){
             if(debug){
                 printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
             }
+            if (stream_buffer_present){
+                if (streamBuffer_HIT){
+                    prefetch(tag_addr);
+                }
+            }
             
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
         }
     }
+
 
     read_misses+=1;
     if (debug){
@@ -113,12 +129,15 @@ void GenericCache::cacheRead(uint32_t address){
     
 
     blockToBeUpdated = evictVictim(address);
-    CacheReadAdj(address);
+    if (streamBuffer_HIT == false){
+        CacheReadAdj(address);
+    }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
+    prefetch(tag_addr);
 }
 
 void GenericCache::cacheWrite(uint32_t address){
@@ -129,6 +148,7 @@ void GenericCache::cacheWrite(uint32_t address){
 
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
     
+    bool streamBuffer_HIT = readStreamBuffer(tag_addr);
 
     for (int block=0; block<assoc; block++){
         
@@ -140,6 +160,13 @@ void GenericCache::cacheWrite(uint32_t address){
             
             cacheBlocks[index_addr][block].d = true;
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
+
+            if (stream_buffer_present){
+                if (streamBuffer_HIT){
+                    prefetch(tag_addr);
+                }
+            }
+
             return;
         }
     }
@@ -153,12 +180,15 @@ void GenericCache::cacheWrite(uint32_t address){
     int blockToBeUpdated;
     
     blockToBeUpdated = evictVictim(address);
-    CacheReadAdj(address); 
+    if (streamBuffer_HIT == false){
+        CacheReadAdj(address);
+    }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
+    prefetch(tag_addr);
 }
 
 uint32_t GenericCache::evictVictim(uint32_t address){
@@ -198,7 +228,35 @@ uint32_t GenericCache::evictVictim(uint32_t address){
 
 }
 
+bool GenericCache::readStreamBuffer(uint32_t address){
+    
+    for (int i=0; i<N; i++){
+        for (int j=0; j<M; j++){
+            if (streamBuffers[i].memoryblocks[j] == address){
+                activeStreamBuffer = i;
+                activeMemoryBlock = j;
+                LRU_Update_stream_buffer(i);
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
+void GenericCache::prefetch(uint32_t address){
+    if (activeMemoryBlock==-1){
+        for (int j=0; j<M; j++){
+            streamBuffers[activeStreamBuffer].memoryblocks[j] = (address + j + 1);
+        }
+    }
+    else if (activeMemoryBlock>-1){
+        for (int j=0; j<activeMemoryBlock+1; j++){
+            streamBuffers[activeStreamBuffer].memoryblocks[j] = (address + (M-activeMemoryBlock)+ j + 1);
+        }
+    }
+    LRU_Update_stream_buffer(activeStreamBuffer);
+    activeMemoryBlock = -1;
+}
 
 void GenericCache::LRU_Update(uint32_t index_addr, int lru_val){
     for (int i=0; i<assoc; i++){
@@ -208,6 +266,17 @@ void GenericCache::LRU_Update(uint32_t index_addr, int lru_val){
         }
         else if (cacheBlocks[index_addr][i].lru == lru_val){
             cacheBlocks[index_addr][i].lru = 0;
+        }
+    }
+}
+
+void GenericCache::LRU_Update_stream_buffer(int n){
+    for (int i=0; i<N; i++){
+        if (streamBuffers[i].lru == n){
+            streamBuffers[i].lru = 0;
+        }
+        else if (streamBuffers[i].lru <n){
+            streamBuffers[i].lru++;
         }
     }
 }
@@ -267,15 +336,24 @@ void GenericCache::PrintContents(){
             printf("\n");
         }
         
-        /*
-        for (int block=0; block<assoc; block++){
-            if (cacheBlocks[set][block].d==true){
-                dirty_bit = 'D';
-            }
-            printf("%x %c\t", cacheBlocks[set][block].tag, dirty_bit);
-        }
-        printf("\n");*/
     }
 }
 
+void GenericCache::PrintStreamBufferContents(){
+    
 
+    for (int i=0; i<N; i++){
+        for (int j=0; j<N; j++){
+            if (streamBuffers[j].lru == i){
+                if (streamBuffers[j].v){
+                    for (int memBlocks=0; memBlocks<M; memBlocks++){
+                        printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
+                    }
+                printf("\n");
+                }
+            }
+        }
+        
+    }
+
+}

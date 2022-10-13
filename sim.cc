@@ -47,13 +47,10 @@ int main (int argc, char *argv[]) {
    
    
 
-   if ((!params.PREF_N) && (!params.PREF_M)){
+   if ((params.PREF_N>0) && (params.PREF_M>0)){
       stream_buffer_present = true;
    }
 
-
-
-   
 
    // Open the trace file for reading.
    fp = fopen(trace_file, "r"); //fp - file pointer
@@ -109,15 +106,22 @@ int main (int argc, char *argv[]) {
    printf("===== L1 contents =====\n");
    L1.PrintContents();
 
+   if ((params.L2_SIZE ==0)&& (stream_buffer_present)){
+      //print stream buffer contents
+      printf("\n===== Stream Buffer(s) contents =====\n");
+      L1.PrintStreamBufferContents();
+   }
+
    if (params.L2_SIZE !=0){
       printf("\n");
       printf("===== L2 contents =====\n");
       L2.PrintContents();
    }
-
-   if (stream_buffer_present){
+   //printf("%d", stream_buffer_present);
+   if ((params.L2_SIZE !=0)&&(stream_buffer_present)){
       //print stream buffer contents
-      //printf("\n===== Stream Buffer(s) contents =====\n");
+      printf("\n===== Stream Buffer(s) contents =====\n");
+      L2.PrintStreamBufferContents();
    }
 
    printf("\n===== Measurements =====");
@@ -156,22 +160,4 @@ int main (int argc, char *argv[]) {
    }
 
    return(0);
-}
-
-void addressDecoder(uint32_t address, uint32_t blocksize, int sets, int *tb, int *ib, int *bb){
-
-   int block_offset_width = (int)log2(blocksize);
-   int index_width = (int)log2(sets);
-   int tag_width = 32-block_offset_width-index_width;
-
-   int block_mask = (1<<index_width)-1;
-   int block_offset_bits = address & block_mask;
-   int index_mask = (1<<index_width) -1;
-   int index_bits = (address>>block_offset_width) & index_mask;
-   int tag_mask = (1<<tag_width) -1;
-   int tag_bits = (address>>(block_offset_width+index_width)) & tag_mask;
-
-   *tb = tag_bits; *ib=index_bits; *bb=block_offset_bits;
-
-   printf("%x: %x %x %x\n",address, tag_bits, index_bits, block_offset_bits);
 }
