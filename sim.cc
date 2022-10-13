@@ -82,13 +82,13 @@ int main (int argc, char *argv[]) {
 
          //l1_readmisses++;
          //printf("%d\n", l1_readmisses);
-         L1.cacheRead(addr, false);
+         L1.cacheRead(addr);
          //printf("r %x\n", addr);
       }
          
       else if (rw == 'w'){
          //printf("w %x\n", addr);
-         L1.cacheWrite(addr, false);
+         L1.cacheWrite(addr);
       }
          
       else {

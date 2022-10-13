@@ -96,19 +96,19 @@ void GenericCache::addressDecoder_sb(uint32_t address, uint32_t *index_addr, uin
     *tag_addr = (address>>(index_width)) & tag_mask;
 }
 
-void GenericCache::cacheRead(uint32_t address, bool prefetch_request){
+void GenericCache::cacheRead(uint32_t address){
     reads++;
 
     uint32_t block_offset_addr = 0;
     uint32_t index_addr = 0;
     uint32_t tag_addr = 0;
 
-    if (prefetch_request==false){
-        addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
-    }
-    else if (prefetch_request==true){
-        addressDecoder_sb(address, &index_addr, &tag_addr);
-    }
+    
+    addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
+    
+    //else if (prefetch_request==true){
+    //    addressDecoder_sb(address, &index_addr, &tag_addr);
+    //}
 
 
     bool streamBuffer_HIT = false;
@@ -148,7 +148,7 @@ void GenericCache::cacheRead(uint32_t address, bool prefetch_request){
 
     blockToBeUpdated = evictVictim(address);
     if (streamBuffer_HIT == false){
-        CacheReadAdj(address, true);
+        CacheReadAdj(address);
     }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
@@ -158,18 +158,18 @@ void GenericCache::cacheRead(uint32_t address, bool prefetch_request){
     prefetch(block_offset_addr, address);
 }
 
-void GenericCache::cacheWrite(uint32_t address, bool prefetch_request){
+void GenericCache::cacheWrite(uint32_t address){
     writes++;
     uint32_t block_offset_addr = 0;
     uint32_t index_addr = 0;
     uint32_t tag_addr = 0;
 
-    if (prefetch_request==false){
-        addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
-    }
-    else if (prefetch_request==true){
-        addressDecoder_sb(address, &index_addr, &tag_addr);
-    }
+    
+    addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
+    
+    //else if (prefetch_request==true){
+    //    addressDecoder_sb(address, &index_addr, &tag_addr);
+    //}
     
     bool streamBuffer_HIT = readStreamBuffer(tag_addr);
 
@@ -204,7 +204,7 @@ void GenericCache::cacheWrite(uint32_t address, bool prefetch_request){
     
     blockToBeUpdated = evictVictim(address);
     if (streamBuffer_HIT == false){
-        CacheReadAdj(address, true);
+        CacheReadAdj(address);
     }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
@@ -243,7 +243,7 @@ uint32_t GenericCache::evictVictim(uint32_t address){
             printf("dirty block identified");
         }
         bool prefetch_request = false;
-        CacheWriteAdj(oldAddress, prefetch_request);
+        CacheWriteAdj(oldAddress);
         //cacheBlocks[index_addr][blockToBeUpdated].d == false;
         //cacheBlocks[index_addr][blockToBeUpdated].v == false;
     }
@@ -288,7 +288,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     if (presentAt==-1){
         for (int j=0; j<M; j++){
             //CacheReadAdj()
-            CacheReadAdj((block_offset_addr + j + 1), true);
+            CacheReadAdj((block_offset_addr + j + 1));
             streamBuffers[lru_val].memoryblocks[j] = (block_offset_addr + j + 1);
             //streamBuffers[lru_val].addressBlocks[j] = (address + j + 1);
             if (debug)
@@ -299,7 +299,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     }
     else if (presentAt>-1){
         for (int j=0; j<presentAt+1; j++){
-            CacheReadAdj((block_offset_addr + j + 1), true);
+            CacheReadAdj((block_offset_addr + j + 1));
             streamBuffers[lru_val].memoryblocks[j] = (block_offset_addr + (M-presentAt)+ j + 1);
         }
     }
@@ -331,22 +331,22 @@ void GenericCache::LRU_Update_stream_buffer(int n){
     }
 }
 
-void GenericCache::CacheReadAdj(uint32_t address, bool prefetch_request){
+void GenericCache::CacheReadAdj(uint32_t address){
     //writebacks+=1;
     if (nextCache == NULL){
     }
     else{
-        nextCache->cacheRead(address, prefetch_request);
+        nextCache->cacheRead(address);
     }
 }
 
-void GenericCache::CacheWriteAdj(uint32_t address, bool prefetch_request){
+void GenericCache::CacheWriteAdj(uint32_t address){
     writebacks+=1;
 
     if(nextCache == NULL){
     }
     else{
-        nextCache->cacheWrite(address, prefetch_request);
+        nextCache->cacheWrite(address);
     }
 }
 

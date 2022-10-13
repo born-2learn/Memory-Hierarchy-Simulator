@@ -39,8 +39,8 @@ private:
 
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
     void LRU_Update_stream_buffer(int);
-    void CacheWriteAdj(uint32_t, bool);
-    void CacheReadAdj(uint32_t, bool);
+    void CacheWriteAdj(uint32_t);
+    void CacheReadAdj(uint32_t);
     uint32_t evictVictim(uint32_t);
 
 public:
@@ -55,8 +55,8 @@ public:
 
     void addressDecoder(uint32_t, uint32_t*, uint32_t*, uint32_t*);
     void addressDecoder_sb(uint32_t, uint32_t*, uint32_t*);
-    void cacheRead(uint32_t, bool);
-    void cacheWrite(uint32_t, bool);
+    void cacheRead(uint32_t);
+    void cacheWrite(uint32_t);
     bool readStreamBuffer(uint32_t);
     void prefetch(uint32_t, uint32_t);
     void PrintContents();
