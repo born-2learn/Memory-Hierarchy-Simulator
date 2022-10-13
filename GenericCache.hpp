@@ -18,10 +18,10 @@ private:
     uint32_t blocksize;
     uint32_t size;
     uint32_t assoc;
-    int cache_level;
     int N;
     int M;
-    struct StreamBuffers **streamBuffers;
+    int cache_level;
+    struct StreamBuffers *streamBuffers;
     struct BLOCKS **cacheBlocks;
     GenericCache *nextCache;
 
@@ -31,6 +31,7 @@ private:
 
     int number_of_sets;
     int block_offset_width; int index_width; int tag_width;
+    bool stream_buffer_present = false;
 
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
     void CacheWriteAdj(uint32_t);
@@ -40,7 +41,7 @@ private:
 public:
 
     int reads=0; int read_misses=0; int writes=0; int write_misses=0; 
-    float miss_rate=0; int writebacks = 0;
+    double miss_rate=0; int writebacks = 0;
 
     int prefetch_read=0; int prefetch_read_misses=0;
 

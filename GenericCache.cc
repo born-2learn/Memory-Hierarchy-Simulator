@@ -11,7 +11,7 @@ GenericCache::GenericCache(){
 
 }
 
-GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, int cache_level, int N, int M, GenericCache* nextCache){
+GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, int N, int M, int cache_level, GenericCache* nextCache){
 
     this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache, this->cache_level=cache_level;
     this->N = N; this-> M = M;
@@ -25,18 +25,33 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
     for (int i=0; i<number_of_sets; i++){
         cacheBlocks[i] = new BLOCKS[assoc]; //assigning each set  
     }
-    /* Stream Buffer Init
-    streamBuffers = new StreamBuffers *[N];
-    //streamBuffers.memoryblocks = new int(M);
 
-    for (int i=0; i<N; i++){
-        streamBuffers[i].lru = i;
-        streamBuffers[i].v = 0;
-        for(int j=0; j<M; j++){
-            streamBuffers.memoryblocks[j] = 0;
-        }
+    
+     //Stream Buffer Init 
+    if((N!=0) && (M!=0)){
+        stream_buffer_present = true;
     }
-    */
+    /*
+    //Create stream buffer only if N>0 and M>0
+    if (stream_buffer_present){
+        streamBuffers = new StreamBuffers[N];
+        //streamBuffers.memoryblocks = new int(M);
+        printf("N:%d M:%d\n", N, M);
+        for (int i=0; i<N; i++){
+            streamBuffers[i].memoryblocks = new uint32_t(M);
+        }
+        for (int i=0; i<N; i++){
+            streamBuffers[i].lru = i;
+            streamBuffers[i].v = 0;
+            for(int j=0; j<M; j++){
+                streamBuffers[i].memoryblocks[j] = j;
+                printf("%d ",streamBuffers[i].memoryblocks[j]);
+            }
+            printf("\n");
+        }
+        
+    }*/
+    
 
     //Assigning zero values to all tags, valid bits and dirty bits
     for (int i =0; i<number_of_sets; i++ ){
@@ -217,8 +232,8 @@ void GenericCache::CacheWriteAdj(uint32_t address){
 }
 
 void GenericCache::PrintContents(){
-    float num = (float)read_misses+write_misses;
-    float den = (float)reads+writes;
+    double num = (double)read_misses+write_misses;
+    double den = (double)reads+writes;
     miss_rate = num/den;
     
     for (int set=0; set<number_of_sets; set++){
