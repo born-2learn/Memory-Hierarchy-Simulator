@@ -10,6 +10,7 @@ struct StreamBuffers{ // N stream buffers to be created and initialized
     bool v;
     int lru;
     uint32_t *memoryblocks; // memory blocks of stream buffer of size M
+    uint32_t *addressBlocks;
 };
 
 class GenericCache
@@ -38,8 +39,8 @@ private:
 
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
     void LRU_Update_stream_buffer(int);
-    void CacheWriteAdj(uint32_t);
-    void CacheReadAdj(uint32_t);
+    void CacheWriteAdj(uint32_t, bool);
+    void CacheReadAdj(uint32_t, bool);
     uint32_t evictVictim(uint32_t);
 
 public:
@@ -53,10 +54,11 @@ public:
     GenericCache(uint32_t, uint32_t, uint32_t, int, int, int, GenericCache*);
 
     void addressDecoder(uint32_t, uint32_t*, uint32_t*, uint32_t*);
-    void cacheRead(uint32_t);
-    void cacheWrite(uint32_t);
+    void addressDecoder_sb(uint32_t, uint32_t*, uint32_t*);
+    void cacheRead(uint32_t, bool);
+    void cacheWrite(uint32_t, bool);
     bool readStreamBuffer(uint32_t);
-    void prefetch(uint32_t);
+    void prefetch(uint32_t, uint32_t);
     void PrintContents();
     void PrintStreamBufferContents();
 };

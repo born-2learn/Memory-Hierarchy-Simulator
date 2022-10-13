@@ -82,13 +82,13 @@ int main (int argc, char *argv[]) {
 
          //l1_readmisses++;
          //printf("%d\n", l1_readmisses);
-         L1.cacheRead(addr);
+         L1.cacheRead(addr, false);
          //printf("r %x\n", addr);
       }
          
       else if (rw == 'w'){
          //printf("w %x\n", addr);
-         L1.cacheWrite(addr);
+         L1.cacheWrite(addr, false);
       }
          
       else {
@@ -108,8 +108,8 @@ int main (int argc, char *argv[]) {
 
    if ((params.L2_SIZE ==0)&& (stream_buffer_present)){
       //print stream buffer contents
-      //printf("\n===== Stream Buffer(s) contents =====\n");
-      //L1.PrintStreamBufferContents();
+      printf("\n===== Stream Buffer(s) contents =====\n");
+      L1.PrintStreamBufferContents();
    }
 
    if (params.L2_SIZE !=0){
@@ -120,8 +120,8 @@ int main (int argc, char *argv[]) {
    //printf("%d", stream_buffer_present);
    if ((params.L2_SIZE !=0)&&(stream_buffer_present)){
       //print stream buffer contents
-      //printf("\n===== Stream Buffer(s) contents =====\n");
-      //L2.PrintStreamBufferContents();
+      printf("\n===== Stream Buffer(s) contents =====\n");
+      L2.PrintStreamBufferContents();
    }
 
    printf("\n===== Measurements =====");
