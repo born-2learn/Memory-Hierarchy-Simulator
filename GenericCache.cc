@@ -5,7 +5,7 @@
 #include "sim.h"
 #include "GenericCache.hpp"
 
-bool debug = false;
+bool debug = true;
 
 GenericCache::GenericCache(){
 
@@ -187,6 +187,7 @@ void GenericCache::cacheWrite(uint32_t address){
             if (stream_buffer_present){
                 if (streamBuffer_HIT){
                     prefetch(block_offset_addr, address);
+                    //LRU_Update_stream_buffer(streamBuffers[i].lru);
                 }
             }
 
@@ -277,7 +278,11 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     for (int i=0; i<N; i++){
         if (streamBuffers[i].lru = (N-1)){
                 lru_val = i;
+                if(debug) printf("LRU SB: %d \n", lru_val);
         }
+    }
+    for (int i=0; i<N; i++){
+        
         for (int j=0; j<M; j++){
             if (streamBuffers[i].addressBlocks[j]==block_offset_addr){
                 presentIn = N;
