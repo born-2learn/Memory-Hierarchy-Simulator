@@ -57,8 +57,6 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
             //printf("\n");
         }
         //printf("N:%d M:%d\n", N, M);
-        activeStreamBuffer = N-1;
-        activeMemoryBlock = -1;
 
     }
     
@@ -299,7 +297,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
             if (streamBuffers[i].memoryblocks[j]==block_offset_addr){
                 presentIn = i; 
                 presentAt = j;
-                streamBuffers[i].queue_pointer = j;
+                //streamBuffers[i].queue_pointer = j;
             }
         }
     }
