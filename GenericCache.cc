@@ -3,9 +3,10 @@
 #include <inttypes.h>
 #include <math.h>
 #include "sim.h"
+#include "constants.h"
 #include "GenericCache.hpp"
 
-bool debug = false;
+//bool debug = true;
 
 GenericCache::GenericCache(){
 
@@ -260,7 +261,7 @@ bool GenericCache::readStreamBuffer(uint32_t address){
             if (streamBuffers[i].memoryblocks[j] == address){
                 activeStreamBuffer = i;
                 activeMemoryBlock = j;
-                LRU_Update_stream_buffer(i);
+                LRU_Update_stream_buffer(streamBuffers[i].lru);
                 return true;
             }
         }
@@ -297,10 +298,14 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     }
     if (presentAt==-1){
         streamBuffers[lru_sb].v = true;
-        LRU_Update_stream_buffer(lru_sb);
+        LRU_Update_stream_buffer(streamBuffers[lru_sb].lru);
         for (int j=0; j<M; j++){
             //CacheReadAdj()
-            CacheReadAdj(block_offset_addr + j + 1);
+            if (debug) {printf("BO address: %x ",block_offset_addr);}
+            uint32_t newAddress = ((block_offset_addr+j+1)<<block_offset_width);
+            if (debug) {printf("New address: %x ",newAddress);}
+            CacheReadAdj(newAddress);
+            prefetch_read++;
             streamBuffers[lru_sb].memoryblocks[j] = (block_offset_addr + j + 1);
             //streamBuffers[lru_val].addressBlocks[j] = (address + j + 1);
             if (debug){
@@ -314,10 +319,12 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     }
     else if (presentAt>-1){
         streamBuffers[presentIn].v = true;
-        LRU_Update_stream_buffer(presentIn);
-        for (int j=0; j<presentAt+1; j++){
-            CacheReadAdj((block_offset_addr + j + 1));
-            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (M-presentAt)+ j + 1);
+        LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
+        for (int j=0; j<=presentAt; j++){
+            uint32_t newAddress = ((block_offset_addr+(M-presentAt)+ j)<<block_offset_width);
+            CacheReadAdj(newAddress);
+            prefetch_read++;
+            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (M-presentAt)+ j );
             
         }
     }
@@ -339,13 +346,16 @@ void GenericCache::LRU_Update(uint32_t index_addr, int lru_val){
 }
 
 void GenericCache::LRU_Update_stream_buffer(int lru_sb){
-    streamBuffers[lru_sb].lru = 0;
+    //streamBuffers[lru_sb].lru = 0;
     for (int i=0; i<N; i++){
-        if (i == lru_sb){
-            continue;
+        if (streamBuffers[i].lru < lru_sb){
+            streamBuffers[i].lru++;
             
         }
-        streamBuffers[i].lru++;
+        else if (streamBuffers[i].lru == lru_sb){
+            streamBuffers[i].lru = 0;
+        }
+        
     }
 }
 
@@ -408,9 +418,13 @@ void GenericCache::PrintContents(){
 }
 
 void GenericCache::PrintStreamBufferContents(){
-    //for (int i=0; i<N; i++){
-
-    //}
+    /*
+    for (int i=0; i<N; i++){
+        for(int j=0; j<M; j++){
+            printf("%d ", streamBuffers[i].lru);
+        }
+        printf("\n");
+    }*/
 
     for (int i=0; i<N; i++){
         for (int j=0; j<N; j++){
