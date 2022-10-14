@@ -16,6 +16,8 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
 
     this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache, this->cache_level=cache_level;
     this->N = N; this-> M = M;
+
+    constant_M = M;
     number_of_sets = size/(assoc*blocksize);
 
     block_offset_width = (int)log2(blocksize);
@@ -298,7 +300,8 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
         }
     }
     if (presentAt==-1){
-        streamBuffers[lru_sb].queue_pointer = 0;
+        streamBuffers[lru_sb].queue_pointer = presentAt+1;
+        //printf("%d %d \n", N, presentAt);
         streamBuffers[lru_sb].v = true;
         LRU_Update_stream_buffer(streamBuffers[lru_sb].lru);
         for (int j=0; j<M; j++){
@@ -323,13 +326,46 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
         streamBuffers[presentIn].queue_pointer = presentAt+1;
         streamBuffers[presentIn].v = true;
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
+
+        //experimental rotation code
+        int pos = presentAt+1;
+        int dir = 1;
+        uint32_t temp = 0;
+        while(pos)  
+        {  
+            if(dir)  
+            {  
+                temp = streamBuffers[presentIn].memoryblocks[0];  
+                for(int i = 0; i < M - 1; i++)  
+                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i + 1];  
+    
+                streamBuffers[presentIn].memoryblocks[M - 1] = temp;  
+            }  
+            else  
+            {  
+                temp = streamBuffers[presentIn].memoryblocks[N - 1];  
+                for(int i = M - 1; i > 0; i--)  
+                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i - 1];  
+    
+                streamBuffers[presentIn].memoryblocks[0] = temp;  
+            }  
+    
+            pos--;  
+        }
+        for (int j=presentAt; j<M; j++){
+            uint32_t newAddress = ((block_offset_addr+(presentAt)+ j)<<block_offset_width);
+            CacheReadAdj(newAddress);
+            prefetch_read++;
+            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (presentAt)+ j  );
+        }
+        /*
         for (int j=0; j<=presentAt; j++){
             uint32_t newAddress = ((block_offset_addr+(M-presentAt)+ j)<<block_offset_width);
             CacheReadAdj(newAddress);
             prefetch_read++;
-            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (M-presentAt)+ j );
+            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (M-presentAt)+ j  );
             
-        }
+        }*/
     }
     //streamBuffers[lru_sb].v = true;
     
@@ -458,12 +494,17 @@ void GenericCache::PrintStreamBufferContents(){
         for (int j=0; j<N; j++){
             if (streamBuffers[j].lru == i){
                 if (streamBuffers[j].v){
+
+                    //printf("%d ", streamBuffers[j].queue_pointer);
                     for (int memBlocks=streamBuffers[j].queue_pointer; memBlocks<M; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
                     for (int memBlocks=0; memBlocks<streamBuffers[j].queue_pointer; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
+                    //for (int memBlocks=0; memBlocks<M; memBlocks++){
+                    //    printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
+                    //}
                 
                 }printf("\n");
             }

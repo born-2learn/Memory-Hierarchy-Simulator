@@ -38,6 +38,8 @@ private:
     int activeStreamBuffer;//n
     int activeMemoryBlock;//m
 
+    int constant_M; //experimental
+
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
     void LRU_Update_stream_buffer(int);
     void CacheWriteAdj(uint32_t);
