@@ -9,6 +9,7 @@ struct BLOCKS{
 struct StreamBuffers{ // N stream buffers to be created and initialized
     bool v;
     int lru;
+    int queue_pointer;
     uint32_t *memoryblocks; // memory blocks of stream buffer of size M
     //uint32_t *addressBlocks;
 };

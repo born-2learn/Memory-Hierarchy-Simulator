@@ -45,6 +45,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         for (int i=0; i<N; i++){
             streamBuffers[i].lru = i;
             streamBuffers[i].v = false;
+            streamBuffers[i].queue_pointer = 0;
             //printf("LRU %d",streamBuffers[i].lru );
             for (int j=0; j<M; j++){
                 streamBuffers[i].memoryblocks[j]=0;
@@ -297,6 +298,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
         }
     }
     if (presentAt==-1){
+        streamBuffers[lru_sb].queue_pointer = 0;
         streamBuffers[lru_sb].v = true;
         LRU_Update_stream_buffer(streamBuffers[lru_sb].lru);
         for (int j=0; j<M; j++){
@@ -318,6 +320,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
         }
     }
     else if (presentAt>-1){
+        streamBuffers[presentIn].queue_pointer = presentAt+1;
         streamBuffers[presentIn].v = true;
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
         for (int j=0; j<=presentAt; j++){
@@ -417,22 +420,50 @@ void GenericCache::PrintContents(){
     }
 }
 
+void selection_sort(uint32_t* arr, int len)
+{
+    uint32_t min, temp;
+    // Iterating for each element except first element.
+    for (int i = 0; i < len - 1; i++)
+    {
+        min = arr[i];
+        // Finding the minimum element from unsorted array and adding to sorted array.
+        for (int j = i; j < len; j++)
+        {
+            if (min > arr[j])
+            {
+                min = arr[j];
+                temp = j;
+            }
+        }
+        arr[temp] = arr[i];
+        arr[i] = min;
+    }
+}
+
 void GenericCache::PrintStreamBufferContents(){
     /*
     for (int i=0; i<N; i++){
-        for(int j=0; j<M; j++){
-            printf("%d ", streamBuffers[i].lru);
+        size_t len = sizeof(streamBuffers[i].memoryblocks)/sizeof(streamBuffers[i].memoryblocks[0]);
+        selection_sort(streamBuffers[i].memoryblocks, len);
+
+        for (int j = 0; j < M; j++)
+        {
+            //printf("%x ",streamBuffers[i].memoryblocks[j]);
         }
-        printf("\n");
+        //printf("\n");
     }*/
 
     for (int i=0; i<N; i++){
         for (int j=0; j<N; j++){
             if (streamBuffers[j].lru == i){
-                //if (streamBuffers[j].v){
-                    for (int memBlocks=0; memBlocks<M; memBlocks++){
+                if (streamBuffers[j].v){
+                    for (int memBlocks=streamBuffers[j].queue_pointer; memBlocks<M; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
-                //    }
+                    }
+                    for (int memBlocks=0; memBlocks<streamBuffers[j].queue_pointer; memBlocks++){
+                        printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
+                    }
                 
                 }printf("\n");
             }
