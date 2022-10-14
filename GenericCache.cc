@@ -107,12 +107,8 @@ void GenericCache::cacheRead(uint32_t address){
 
     
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
-    
-    //else if (prefetch_request==true){
-    //    addressDecoder_sb(address, &index_addr, &tag_addr);
-    //}
 
-
+    //check if block is present in stream buffer
     bool streamBuffer_HIT = false;
     if (stream_buffer_present){
         streamBuffer_HIT = readStreamBuffer(block_offset_addr);
@@ -128,35 +124,36 @@ void GenericCache::cacheRead(uint32_t address){
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             
             if (stream_buffer_present){
-                if (streamBuffer_HIT){
-                    prefetch(block_offset_addr);
+                if (streamBuffer_HIT){ 
+                    // Scenario #3: if false: Hits in cache but not present in SB (do nothing)
+                    // Scenario #4: Hits in cache and stream buffer (prefetch)
+                    prefetch(block_offset_addr); 
                 }
             }
             return;
             
         }
     }
-
+    // Scenario # 1: Miss in cache & Miss in SB
     if (!streamBuffer_HIT){
         read_misses+=1;
-        
         
     }
     if (debug){
         printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
     }
     
-    
-
     //evicting the victim block
     int blockToBeUpdated;
-    
-    
-
     blockToBeUpdated = evictVictim(address);
-   if(streamBuffer_HIT==false){
+
+    // Scenario # 1: Miss in cache & Miss in SB
+   if(!streamBuffer_HIT){
         CacheReadAdj(address);
     }
+
+    // Missed: allocating block in cache
+    // Scenario #2: Miss in cache & hit in stream buffer
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
