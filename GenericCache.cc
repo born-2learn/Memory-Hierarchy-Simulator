@@ -141,7 +141,7 @@ void GenericCache::cacheRead(uint32_t address){
 
     if (!streamBuffer_HIT){
         read_misses+=1;
-        CacheReadAdj(address);
+        
         
     }
     if (debug){
@@ -153,9 +153,12 @@ void GenericCache::cacheRead(uint32_t address){
     //evicting the victim block
     int blockToBeUpdated;
     
+    
 
     blockToBeUpdated = evictVictim(address);
-   
+   if(streamBuffer_HIT==false){
+        CacheReadAdj(address);
+    }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
