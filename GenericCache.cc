@@ -5,7 +5,7 @@
 #include "sim.h"
 #include "GenericCache.hpp"
 
-bool debug = true;
+bool debug = false;
 
 GenericCache::GenericCache(){
 
@@ -276,7 +276,8 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     int presentIn = -1; //present in which stream buffer
     int lru_val = 0; //location where LRU is max (Least recently used)
     for (int i=0; i<N; i++){
-        if (streamBuffers[i].lru = (N-1)){
+        //printf("%d%d ", streamBuffers[i].lru, (N-1));
+        if (streamBuffers[i].lru == (N-1)){
                 lru_val = i;
                 if(debug) printf("LRU SB: %d \n", lru_val);
         }
@@ -325,14 +326,14 @@ void GenericCache::LRU_Update(uint32_t index_addr, int lru_val){
     }
 }
 
-void GenericCache::LRU_Update_stream_buffer(int n){
+void GenericCache::LRU_Update_stream_buffer(int lru_sb){
+    streamBuffers[lru_sb].lru = 0;
     for (int i=0; i<N; i++){
-        if (streamBuffers[i].lru == n){
-            streamBuffers[i].lru = 0;
+        if (i == lru_sb){
+            continue;
+            
         }
-        else if (streamBuffers[i].lru <n){
-            streamBuffers[i].lru++;
-        }
+        streamBuffers[i].lru++;
     }
 }
 
