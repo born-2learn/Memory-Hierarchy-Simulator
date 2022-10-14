@@ -127,19 +127,22 @@ void GenericCache::cacheRead(uint32_t address){
             if(debug){
                 printf("%x: Read Hit in Cache L%d\n", tag_addr, cache_level);
             }
+            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
+            
             if (stream_buffer_present){
                 if (streamBuffer_HIT){
                     prefetch(block_offset_addr);
                 }
             }
-            
-            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
+            
         }
     }
 
     if (!streamBuffer_HIT){
         read_misses+=1;
+        CacheReadAdj(address);
+        
     }
     if (debug){
         printf("%x: Read Miss in Cache L%d\n",tag_addr, cache_level);
@@ -152,9 +155,7 @@ void GenericCache::cacheRead(uint32_t address){
     
 
     blockToBeUpdated = evictVictim(address);
-    if (streamBuffer_HIT == false){
-        CacheReadAdj(address);
-    }
+   
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = false;
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
@@ -172,7 +173,8 @@ void GenericCache::cacheWrite(uint32_t address){
     
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
     
-    bool streamBuffer_HIT = readStreamBuffer(tag_addr);
+    bool streamBuffer_HIT =false;
+    streamBuffer_HIT = readStreamBuffer(tag_addr);
 
     for (int block=0; block<assoc; block++){
         
@@ -184,17 +186,19 @@ void GenericCache::cacheWrite(uint32_t address){
             
             cacheBlocks[index_addr][block].d = true;
             LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
-
+            
             if (stream_buffer_present){
                 if (streamBuffer_HIT){
                     prefetch(block_offset_addr);
                     //LRU_Update_stream_buffer(streamBuffers[i].lru);
                 }
             }
-
             return;
+            
         }
     }
+    //cache miss
+
     if(!streamBuffer_HIT){
         write_misses+=1;
     }
@@ -208,6 +212,7 @@ void GenericCache::cacheWrite(uint32_t address){
     blockToBeUpdated = evictVictim(address);
     if (streamBuffer_HIT == false){
         CacheReadAdj(address);
+        //
     }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
@@ -274,7 +279,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
     int presentAt = -1; //present at what memory location
     int presentIn = -1; //present in which stream buffer
 
-    int lru_sb = 0; //Stream buffer with highest LRU val (MRU)
+    int lru_sb = 0; //Stream buffer with highest LRU val
     for (int i=0; i<N; i++){
         //printf("%d%d ", streamBuffers[i].lru, (N-1));
         if (streamBuffers[i].lru == (N-1)){
@@ -289,7 +294,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
         
         for (int j=0; j<M; j++){
             if (streamBuffers[i].memoryblocks[j]==block_offset_addr){
-                presentIn = i;
+                presentIn = i; 
                 presentAt = j;
                 streamBuffers[i].queue_pointer = j;
             }
@@ -393,7 +398,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
             
         }
     }
-    //streamBuffers[lru_sb].v = true;
+    
     
 }
 
