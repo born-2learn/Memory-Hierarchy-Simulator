@@ -328,7 +328,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
 
         //experimental rotation code
-        int pos = presentAt+1;
+        int pos = presentAt;
         int dir = 1;
         uint32_t temp = 0;
         while(pos)  
