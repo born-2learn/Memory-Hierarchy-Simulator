@@ -39,7 +39,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         //streamBuffers.memoryblocks = new int(M);
         for (int i=0; i<N; i++){
             streamBuffers[i].memoryblocks = new uint32_t(M);
-            streamBuffers[i].addressBlocks = new uint32_t(M);
+            //streamBuffers[i].addressBlocks = new uint32_t(M);
             //streamBuffers[i].lru = i;
         }
         for (int i=0; i<N; i++){
@@ -48,7 +48,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
             //printf("LRU %d",streamBuffers[i].lru );
             for (int j=0; j<M; j++){
                 streamBuffers[i].memoryblocks[j]=0;
-                streamBuffers[i].addressBlocks[j]=0;
+                //streamBuffers[i].addressBlocks[j]=0;
                 //printf("%d ",streamBuffers[i].memoryblocks[j]);
             }
             //printf("\n");
@@ -290,9 +290,9 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
     for (int i=0; i<N; i++){
         
         for (int j=0; j<M; j++){
-            if (streamBuffers[i].addressBlocks[j]==block_offset_addr){
-                presentIn = N;
-                presentAt = M;
+            if (streamBuffers[i].memoryblocks[j]==block_offset_addr){
+                presentIn = i;
+                presentAt = j;
             }
         }
     }

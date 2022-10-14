@@ -10,7 +10,7 @@ struct StreamBuffers{ // N stream buffers to be created and initialized
     bool v;
     int lru;
     uint32_t *memoryblocks; // memory blocks of stream buffer of size M
-    uint32_t *addressBlocks;
+    //uint32_t *addressBlocks;
 };
 
 class GenericCache
