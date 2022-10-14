@@ -182,15 +182,15 @@ void GenericCache::cacheWrite(uint32_t address){
                 printf("%x: Write Hit in Cache L%d\n", tag_addr, cache_level);
             }
             
-            cacheBlocks[index_addr][block].d = true;
-            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
+            
             
             if (stream_buffer_present){
                 if (streamBuffer_HIT){
                     prefetch(block_offset_addr);
-                    //LRU_Update_stream_buffer(streamBuffers[i].lru);
                 }
             }
+            cacheBlocks[index_addr][block].d = true;
+            LRU_Update(index_addr, cacheBlocks[index_addr][block].lru);
             return;
             
         }
@@ -206,11 +206,10 @@ void GenericCache::cacheWrite(uint32_t address){
     
     //evicting the victim block
     int blockToBeUpdated;
-    
     blockToBeUpdated = evictVictim(address);
-    if (streamBuffer_HIT == false){
+
+    if (!streamBuffer_HIT){
         CacheReadAdj(address);
-        //
     }
     cacheBlocks[index_addr][blockToBeUpdated].v = true;
     cacheBlocks[index_addr][blockToBeUpdated].d = true;
@@ -260,8 +259,6 @@ bool GenericCache::readStreamBuffer(uint32_t address){
     for (int i=0; i<N; i++){
         for (int j=0; j<M; j++){
             if (streamBuffers[i].memoryblocks[j] == address){
-                activeStreamBuffer = i;
-                activeMemoryBlock = j;
                 LRU_Update_stream_buffer(streamBuffers[i].lru);
                 return true;
             }
@@ -298,6 +295,8 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
             }
         }
     }
+
+    // Scenario #1 : Create a new prefetch stream 
     if (presentAt==-1){
         //streamBuffers[lru_sb].queue_pointer = presentAt+1;
         //printf("%d %d \n", N, presentAt);
@@ -343,12 +342,12 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
             printf("\n");
         }
     }
+
+    // Scenario #2 and #4
     else if (presentAt!=-1){
-        //streamBuffers[presentIn].queue_pointer = presentAt+1;
+        streamBuffers[presentIn].queue_pointer = presentAt+1;
         streamBuffers[presentIn].v = true;
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
-
-        
         
         for (int j=0; j<=presentAt; j++){
             uint32_t newAddress = ((block_offset_addr+(M-presentAt)+ j)<<block_offset_width);
