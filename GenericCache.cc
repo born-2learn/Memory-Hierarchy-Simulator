@@ -496,16 +496,16 @@ void GenericCache::PrintStreamBufferContents(){
                 if (streamBuffers[j].v){
 
                     //printf("%d ", streamBuffers[j].queue_pointer);
-                    /*
+                    
                     for (int memBlocks=streamBuffers[j].queue_pointer; memBlocks<M; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
                     for (int memBlocks=0; memBlocks<streamBuffers[j].queue_pointer; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
-                    }*/
-                    for (int memBlocks=0; memBlocks<M; memBlocks++){
-                        printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
+                    //for (int memBlocks=0; memBlocks<M; memBlocks++){
+                    //    printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
+                    //}
                 
                 }printf("\n");
             }
