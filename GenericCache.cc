@@ -15,7 +15,6 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
     this->blocksize = blocksize; this->size = size; this->assoc=assoc;this->nextCache=nextCache, this->cache_level=cache_level;
     this->N = N; this-> M = M;
 
-    constant_M = M;
     number_of_sets = size/(assoc*blocksize);
 
     block_offset_width = (int)log2(blocksize);
@@ -27,7 +26,6 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         cacheBlocks[i] = new BLOCKS[assoc]; //assigning each set  
     }
 
-    activeStreamBuffer = -1; activeMemoryBlock = -1;
      //Stream Buffer Init 
     if((N>0) && (M>0)){
         stream_buffer_present = true;
@@ -45,7 +43,7 @@ GenericCache::GenericCache(uint32_t blocksize, uint32_t size, uint32_t assoc, in
         for (int i=0; i<N; i++){
             streamBuffers[i].lru = i;
             streamBuffers[i].v = false;
-            streamBuffers[i].queue_pointer = 0;
+            streamBuffers[i].head = 0;
             //printf("LRU %d",streamBuffers[i].lru );
             for (int j=0; j<M; j++){
                 streamBuffers[i].memoryblocks[j]=0;
@@ -289,14 +287,14 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
             if (streamBuffers[i].memoryblocks[j]==block_offset_addr){
                 presentIn = i; 
                 presentAt = j;
-                //streamBuffers[i].queue_pointer = j;
+                //streamBuffers[i].head = j;
             }
         }
     }
 
     // Scenario #1 : Create a new prefetch stream 
     if (presentAt==-1){
-        //streamBuffers[lru_sb].queue_pointer = presentAt+1;
+        //streamBuffers[lru_sb].head = presentAt+1;
         //printf("%d %d \n", N, presentAt);
         streamBuffers[lru_sb].v = true;
         LRU_Update_stream_buffer(streamBuffers[lru_sb].lru);
@@ -343,7 +341,7 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
 
     // Scenario #2 and #4
     else if (presentAt!=-1){
-        streamBuffers[presentIn].queue_pointer = presentAt+1;
+        streamBuffers[presentIn].head = presentAt+1;
         streamBuffers[presentIn].v = true;
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
         
@@ -494,12 +492,12 @@ void GenericCache::PrintStreamBufferContents(){
             if (streamBuffers[j].lru == i){
                 if (streamBuffers[j].v){
 
-                    //printf("%d ", streamBuffers[j].queue_pointer);
+                    //printf("%d ", streamBuffers[j].head);
                     
-                    for (int memBlocks=streamBuffers[j].queue_pointer; memBlocks<M; memBlocks++){
+                    for (int memBlocks=streamBuffers[j].head; memBlocks<M; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
-                    for (int memBlocks=0; memBlocks<streamBuffers[j].queue_pointer; memBlocks++){
+                    for (int memBlocks=0; memBlocks<streamBuffers[j].head; memBlocks++){
                         printf("%x ", streamBuffers[j].memoryblocks[memBlocks]);
                     }
                     //for (int memBlocks=0; memBlocks<M; memBlocks++){
