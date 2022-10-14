@@ -353,10 +353,10 @@ void GenericCache::prefetch(uint32_t block_offset_addr, uint32_t address){
             pos--;  
         }
         for (int j=presentAt; j<M; j++){
-            uint32_t newAddress = ((block_offset_addr+(presentAt)+ j)<<block_offset_width);
+            uint32_t newAddress = ((block_offset_addr+(presentAt+1)+ j)<<block_offset_width);
             CacheReadAdj(newAddress);
             prefetch_read++;
-            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (presentAt)+ j  );
+            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (presentAt+1)+ j  );
         }
         /*
         for (int j=0; j<=presentAt; j++){
