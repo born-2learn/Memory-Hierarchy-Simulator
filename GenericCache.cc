@@ -320,12 +320,15 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
                 //printf("New address: %x ",newAddress);
             }
             bool isPresentinSB = false;
+            /*
+            
             for (int k=0; k<M; k++){
                 if (streamBuffers[lru_sb].memoryblocks[k] == (block_offset_addr + j + 1)){
                     isPresentinSB = true;
                     break;
                 }
             }
+            */
             if (!isPresentinSB){
                 CacheReadAdj(newAddress);
                 prefetch_read++;
@@ -348,49 +351,20 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
         streamBuffers[presentIn].v = true;
         LRU_Update_stream_buffer(streamBuffers[presentIn].lru);
 
-        //experimental rotation code
-        /*
-        int pos = presentAt;
-        int dir = 0;
-        uint32_t temp = 0;
-        while(pos)  
-        {  
-            if(dir)  
-            {  
-                temp = streamBuffers[presentIn].memoryblocks[0];  
-                for(int i = 0; i < M - 1; i++)  
-                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i + 1];  
-    
-                streamBuffers[presentIn].memoryblocks[M - 1] = temp;  
-            }  
-            else  
-            {  
-                temp = streamBuffers[presentIn].memoryblocks[N - 1];  
-                for(int i = M - 1; i > 0; i--)  
-                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i - 1];  
-    
-                streamBuffers[presentIn].memoryblocks[0] = temp;  
-            }  
-    
-            pos--;  
-        }
-        for (int j=presentAt; j<M; j++){
-            uint32_t newAddress = ((block_offset_addr+(presentAt+1)+ j)<<block_offset_width);
-            CacheReadAdj(newAddress);
-            prefetch_read++;
-            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (presentAt+1)+ j  );
-        }*/
+        
         
         for (int j=0; j<=presentAt; j++){
             uint32_t newAddress = ((block_offset_addr+(M-presentAt)+ j)<<block_offset_width);
 
             bool isPresentinSB = false;
+            /*
             for (int k=0; k<M; k++){
                 if (streamBuffers[presentIn].memoryblocks[k] == (block_offset_addr + j + 1)){
                     isPresentinSB = true;
                     break;
                 }
             }
+            */
             if (!isPresentinSB){
                 CacheReadAdj(newAddress);
                 prefetch_read++;

@@ -72,3 +72,36 @@ void addressDecoder(uint32_t address, uint32_t blocksize, int sets, int *tb, int
 
    printf("%x: %x %x %x\n",address, tag_bits, index_bits, block_offset_bits);
 }
+
+//experimental rotation code
+        /*
+        int pos = presentAt;
+        int dir = 0;
+        uint32_t temp = 0;
+        while(pos)  
+        {  
+            if(dir)  
+            {  
+                temp = streamBuffers[presentIn].memoryblocks[0];  
+                for(int i = 0; i < M - 1; i++)  
+                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i + 1];  
+    
+                streamBuffers[presentIn].memoryblocks[M - 1] = temp;  
+            }  
+            else  
+            {  
+                temp = streamBuffers[presentIn].memoryblocks[N - 1];  
+                for(int i = M - 1; i > 0; i--)  
+                    streamBuffers[presentIn].memoryblocks[i] = streamBuffers[presentIn].memoryblocks[i - 1];  
+    
+                streamBuffers[presentIn].memoryblocks[0] = temp;  
+            }  
+    
+            pos--;  
+        }
+        for (int j=presentAt; j<M; j++){
+            uint32_t newAddress = ((block_offset_addr+(presentAt+1)+ j)<<block_offset_width);
+            CacheReadAdj(newAddress);
+            prefetch_read++;
+            streamBuffers[presentIn].memoryblocks[j] = (block_offset_addr + (presentAt+1)+ j  );
+        }*/
