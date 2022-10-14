@@ -9,7 +9,7 @@ struct BLOCKS{
 struct StreamBuffers{ // N stream buffers to be created and initialized
     bool v;
     int lru;
-    int queue_pointer;
+    int head;
     uint32_t *memoryblocks; // memory blocks of stream buffer of size M
     //uint32_t *addressBlocks;
 };
@@ -27,18 +27,9 @@ private:
     struct BLOCKS **cacheBlocks;
     GenericCache *nextCache;
 
-    //uint32_t block_offset_addr;
-    //uint32_t index_addr;
-    //uint32_t tag_addr;
-
     int number_of_sets;
     int block_offset_width; int index_width; int tag_width;
     bool stream_buffer_present = false;
-
-    int activeStreamBuffer;//n
-    int activeMemoryBlock;//m
-
-    int constant_M; //experimental
 
     void LRU_Update(uint32_t, int); //accepts index and the LRU 
     void LRU_Update_stream_buffer(int);
