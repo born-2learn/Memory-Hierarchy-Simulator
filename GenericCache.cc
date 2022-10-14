@@ -6,8 +6,6 @@
 #include "constants.h"
 #include "GenericCache.hpp"
 
-//bool debug = true;
-
 GenericCache::GenericCache(){
 
 }
