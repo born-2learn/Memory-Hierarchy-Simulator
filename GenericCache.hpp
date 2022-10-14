@@ -61,7 +61,7 @@ public:
     void cacheRead(uint32_t);
     void cacheWrite(uint32_t);
     bool readStreamBuffer(uint32_t);
-    void prefetch(uint32_t, uint32_t);
+    void prefetch(uint32_t);
     void PrintContents();
     void PrintStreamBufferContents();
 };

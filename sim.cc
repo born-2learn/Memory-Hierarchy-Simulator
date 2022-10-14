@@ -153,10 +153,10 @@ int main (int argc, char *argv[]) {
    printf("\no. L2 writebacks:\t\t%d", L2.writebacks);
    printf("\np. L2 prefetches:\t\t%d", L2.prefetch_read);
    if (params.L2_SIZE !=0){
-   printf("\nq. memory traffic:\t\t%d", L2.write_misses+L2.read_misses+L2.writebacks); 
+   printf("\nq. memory traffic:\t\t%d", L2.write_misses+L2.read_misses+L2.writebacks+L2.prefetch_read+L2.prefetch_read_misses); 
    }
    else{
-      printf("\nq. memory traffic:\t\t%d\n", L1.write_misses+L1.read_misses+L1.writebacks); 
+      printf("\nq. memory traffic:\t\t%d\n", L1.write_misses+L1.read_misses+L1.writebacks+L1.prefetch_read); 
    }
 
    return(0);

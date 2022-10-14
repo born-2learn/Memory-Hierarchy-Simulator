@@ -1,1 +1,1 @@
-#define debug 0
+#define debug 1
