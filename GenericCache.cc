@@ -159,7 +159,9 @@ void GenericCache::cacheRead(uint32_t address){
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
-    prefetch(block_offset_addr);
+    if (stream_buffer_present){
+        prefetch(block_offset_addr);
+    }
 }
 
 void GenericCache::cacheWrite(uint32_t address){
@@ -172,7 +174,9 @@ void GenericCache::cacheWrite(uint32_t address){
     addressDecoder(address, &block_offset_addr, &index_addr, &tag_addr);
     
     bool streamBuffer_HIT =false;
-    streamBuffer_HIT = readStreamBuffer(tag_addr);
+    if (stream_buffer_present){
+        streamBuffer_HIT = readStreamBuffer(block_offset_addr);
+    }
 
     for (int block=0; block<assoc; block++){
         
@@ -217,7 +221,9 @@ void GenericCache::cacheWrite(uint32_t address){
     cacheBlocks[index_addr][blockToBeUpdated].tag = tag_addr;
     cacheBlocks[index_addr][blockToBeUpdated].address = address;
     LRU_Update(index_addr, cacheBlocks[index_addr][blockToBeUpdated].lru);
-    prefetch(block_offset_addr);
+    if (stream_buffer_present){
+        prefetch(block_offset_addr);
+    }
 }
 
 uint32_t GenericCache::evictVictim(uint32_t address){
