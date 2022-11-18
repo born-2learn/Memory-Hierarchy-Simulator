@@ -127,6 +127,7 @@ void GenericCache::cacheRead(uint32_t address){
                 if (streamBuffer_HIT){ 
                     // Scenario #3: if false: Hits in cache but not present in SB (do nothing)
                     // Scenario #4: Hits in cache and stream buffer (prefetch)
+                    //printf("nonsense");
                     prefetch(block_offset_addr); 
                 }
             }
@@ -293,7 +294,9 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
                 }
         }
     }
-    
+
+    //searching in stream buffer (to be replaced)
+    /*
     for (int i=0; i<N; i++){
         
         for (int j=0; j<M; j++){
@@ -303,8 +306,24 @@ void GenericCache::prefetch(uint32_t block_offset_addr){
                 //streamBuffers[i].queue_pointer = j;
             }
         }
+    }*/
+    
+    for (int lru_counter=0; lru_counter<N; lru_counter++){
+        for( int k = 0; k<N; k++){
+            if(streamBuffers[k].lru == lru_counter){
+                for (int j=0; j<M; j++){
+                    if(streamBuffers[k].memoryblocks[j]==block_offset_addr){
+                        presentIn = k;
+                        presentAt = j; 
+                        break;
+                    }
+                }
+            }
+        }
     }
+    //printf("nonsense from prefetch");
     if (presentAt==-1){
+        
         //streamBuffers[lru_sb].queue_pointer = presentAt+1;
         //printf("%d %d \n", N, presentAt);
         streamBuffers[lru_sb].v = true;

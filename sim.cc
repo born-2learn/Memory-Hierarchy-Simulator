@@ -17,6 +17,7 @@ int main (int argc, char *argv[]) {
    uint32_t addr;		// This variable holds the request's address obtained from the trace.
 				// The header file <inttypes.h> above defines signed and unsigned integers of various sizes in a machine-agnostic way.  "uint32_t" is an unsigned integer of 32 bits.
    bool stream_buffer_present = false;
+   int trace_count = 1;
    // Exit with an error if the number of command-line arguments is incorrect.
    if (argc != 9) {
       printf("Error: Expected 8 command-line arguments but was provided %d.\n", (argc - 1));
@@ -71,8 +72,7 @@ int main (int argc, char *argv[]) {
    printf("PREF_M:     %u\n", params.PREF_M);
    printf("trace_file: %s\n", trace_file);
    //printf("===================================\n");
-
-
+   
    // Read requests from the trace file and echo them back.
    while (fscanf(fp, "%c %x\n", &rw, &addr) == 2) {	// Stay in the loop if fscanf() successfully parsed two tokens as specified.
 
@@ -82,6 +82,7 @@ int main (int argc, char *argv[]) {
 
          //l1_readmisses++;
          //printf("%d\n", l1_readmisses);
+         //printf("%d=r ")
          L1.cacheRead(addr);
          //printf("r %x\n", addr);
       }
